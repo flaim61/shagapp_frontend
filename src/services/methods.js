@@ -1,6 +1,6 @@
 import axios from 'axios';
 import api from './config.js';
-import { baseUrl, baseUrlApi } from './config.js';
+import { baseUrl, baseUrlApi, token_key } from './config.js';
 
 const $api = axios.create({
     withCredentials: false,
@@ -29,4 +29,24 @@ export const getBanners = async function(bannerId) {
 
 export const getInfoProduct = async function (id) {
     return await $api.get(api.product.getInfo + "/" + id);
+}
+
+export const register = async function(user){
+    return await $api.post(api.user.register, user);
+}
+
+export const login = async function(user){
+    return await $api.post(api.user.login, user);
+}
+
+export const isAuthorisated = async function(){
+    const token = localStorage.getItem(token_key);
+
+    if(token == null || token === ""){
+        return false;
+    }
+    
+    return await $api.post(api.user.isAuthorisated, {
+        "token" : localStorage.getItem(token_key)
+    });
 }
