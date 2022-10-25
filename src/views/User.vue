@@ -34,19 +34,22 @@
         <div class="container d-flex justify-content-between">
             <div>
                 <p>
-                    Здравствуйте, Имя!
+                    Здравствуйте, {{ this.user.name }} !
                 </p>
                 <li>
-                    Имя: Имя
+                    Имя: {{ this.user.name }}
                 </li>
                 <li>
-                    Email: Почта
+                    Email: {{ this.user.email }}
+                </li>
+                <li>
+                    Зарегистрирован с: {{ this.user.created_at }}
                 </li>
                 <div class='d-flex flex-column justify-content-between'>
                     <h5>Хотите поменять пароль?</h5>
-                    <input type="password" placeholder="Введите старый пароль"><br>
-                    <input type="password" placeholder="Введите новый пароль"><br>
-                    <input type="password" placeholder="Введите подтверждение пароля"><br>
+                    <input type="password" placeholder="Введите старый пароль" id='old_password_reset'><br>
+                    <input type="password" placeholder="Введите новый пароль" id='new_password_reset'><br>
+                    <input type="password" placeholder="Введите подтверждение пароля" id='new_password_confirm_reset'><br>
                     <div type="submit" class="btn btn-default" >Обновить пароль</div>
                 </div>
             </div>
@@ -60,7 +63,13 @@
 </template>
   
 <script>
-    import { register, isAuthorisated, login } from '../services/methods.js';
+    import { 
+        register, 
+        isAuthorisated, 
+        login,
+        resertPassword,
+        getUserInfo
+    } from '../services/methods.js';
     import { token_key } from '../services/config.js'
 
     export default {
@@ -69,12 +78,16 @@
         },
         data() {
             return {
-                isLogin: false
+                isLogin: false,
+                user: {
+                    email: null,
+                    name: null
+                }
             }
         },
         async created() {
             this.isLogin = await this.checkLogin();
-            console.log(this.isLogin);
+            this.user = await this.getUserInfo();
         },
         methods: {
             async checkLogin(){ 
@@ -82,27 +95,40 @@
                 return request.data.status;
             },
             async register(){
-                let name = document.getElementById('name').value;
-                let email = document.getElementById('email').value;
-                let pass = document.getElementById('pass').value;
-                let pass_confirm = document.getElementById('pass_confirm').value;
-                
-                if (pass === pass_confirm) {
-                    const user = {
-                        "name": name,
-                        "email": email,
-                        "password": pass
+                try {
+                    let name = document.getElementById('name').value;
+                    let email = document.getElementById('email').value;
+                    let pass = document.getElementById('pass').value;
+                    let pass_confirm = document.getElementById('pass_confirm').value;
+                    
+                    if (name === "" || 
+                        email === "" ||
+                        pass === "" ||
+                        pass_confirm === ""
+                    ){
+                        this.showError('Ошибка регистрации!');
+                        return;
                     }
 
-                    const response = await register(user);
+                    if (pass === pass_confirm) {
+                        const user = {
+                            "name": name,
+                            "email": email,
+                            "password": pass
+                        }
 
-                    if(response.data.status === 'success'){    
-                        const token = response.data.token;
-                        localStorage.setItem(token_key, token);
-                        this.isLogin = true;
-                    }else{
-                        alert('Произошла ошибка');
+                        const response = await register(user);
+
+                        if(response.data.status === 'success'){    
+                            const token = response.data.token;
+                            localStorage.setItem(token_key, token);
+                            this.isLogin = true;
+                        }else{
+                            this.showError('Ошибка регистрации!');
+                        }
                     }
+                } catch (error) {
+                    this.showError('Ошибка! Сервер временно не доступен!');
                 }
             },
             logout(){
@@ -110,24 +136,72 @@
                 this.isLogin = false;
             },
             async login(){
-                let email = document.getElementById('email_login').value;
-                let pass = document.getElementById('password_login').value;
+                try {
+                    let email = document.getElementById('email_login').value;
+                    let pass = document.getElementById('password_login').value;
 
-                const user = {
-                    "email": email,
-                    "password": pass
+                    const user = {
+                        "email": email,
+                        "password": pass
+                    }
+
+                    const response = await login(user);
+
+                    if(response.data.status === 'success'){    
+                        const token = response.data.token;
+                        localStorage.setItem(token_key, token);
+                        this.isLogin = true;
+                    }else{
+                        this.showError('Ошибка авторизации!');
+                    }
+                } catch (error) {
+                    this.showError('Ошибка! Сервер временно не доступен!');
                 }
+            },
+            async passwordResert(){
+                try {
+                    let oldPassword = document.getElementById('old_password_reset').value;
+                    let newPassword = document.getElementById('new_password_reset').value;
+                    let newPasswordConfirm = document.getElementById('new_password_confirm_reset').value;
 
-                const response = await login(user);
+                    if (newPassword === newPasswordConfirm) {
+                        const response = await resertPassword(
+                            oldPassword, 
+                            newPassword
+                        );
 
-                if(response.data.status === 'success'){    
-                    const token = response.data.token;
-                    localStorage.setItem(token_key, token);
-                    this.isLogin = true;
-                }else{
-                    alert('Произошла ошибка');
+                        console.log(response);
+                    }else{
+                        this.showError('Ошибка смены пароля!');
+                    }
+                } catch (error) {
+                    this.showError('Ошибка! Сервер временно не доступен!');
+                }                
+            },
+            async getUserInfo() {
+                try {
+                    const response = await getUserInfo();
+                    let user = response.data.user;
+                    let created_at = new Date(user.created_at);
+                    const year = created_at.getFullYear();
+                    const mounth = (created_at.getMonth()+1)<10 ? "0" + (created_at.getMonth()+1) : (created_at.getMonth()+1);
+                    const date = created_at.getDate();
+                    let created_at_formated = year + "/" + mounth + "/" + date;
+                    user.created_at = created_at_formated;
+
+                    return response.data.user;
+                } catch (error) {
+                    this.showError('Ошибка получения данных пользователя!');
                 }
-            }
+            },  
+            showError(text){
+                this.$swal({
+                    title: 'Ошибка!',
+                    text: text,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                })
+            },
         }
     }
 </script>

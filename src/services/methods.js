@@ -50,3 +50,17 @@ export const isAuthorisated = async function(){
         "token" : localStorage.getItem(token_key)
     });
 }
+
+export const resertPassword = async function(oldPassword, newPassword){
+    return await $api.post(api.user.resertPassword, {
+        "password" : newPassword,
+        "oldPassword" : oldPassword,
+        "token" : localStorage.getItem(token_key)
+    });
+}
+
+export const getUserInfo = async function () {
+    return await $api.post(api.user.getInfo, {
+        "token" : localStorage.getItem(token_key)
+    })
+}

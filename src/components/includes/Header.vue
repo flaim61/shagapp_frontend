@@ -37,11 +37,12 @@
 					<div class="col-sm-8">
 						<div class="shop-menu pull-right">
 							<ul class="nav navbar-nav">
-								<li><a href="#"><i class="fa fa-user"></i> Account</a></li>
+								
+								<li v-if="this.isLogin"><a @click="this.$router.push('/user')"><i class="fa fa-user"></i> Account</a></li>
 								<li><a href="#"><i class="fa fa-star"></i> Wishlist</a></li>
 								<li><a href="checkout.html"><i class="fa fa-crosshairs"></i> Checkout</a></li>
 								<li><a href="cart.html"><i class="fa fa-shopping-cart"></i> Cart</a></li>
-								<li><a href="login.html"><i class="fa fa-lock"></i> Login</a></li>
+								<li v-if="!this.isLogin"><a href="login.html"><i class="fa fa-lock"></i> Login</a></li>
 							</ul>
 						</div>
 					</div>
@@ -90,12 +91,147 @@
 
 <script>
 	import Dropdown from "../Links/Dropdown.vue";
+	import { 
+        register, 
+        isAuthorisated, 
+        login,
+        resertPassword,
+        getUserInfo
+    } from '../../services/methods.js';
+    import { token_key } from '../../services/config.js'
 
 	export default {
 		name: 'Header',
 		components: {
 			Dropdown
 		},
+		data() {
+            return {
+                isLogin: false,
+                user: {
+                    email: null,
+                    name: null
+                }
+            }
+        },
+		async created() {
+            this.isLogin = await this.checkLogin();
+            this.user = await this.getUserInfo();
+        },
+		methods: {
+            async checkLogin(){ 
+                const request = await isAuthorisated();
+                return request.data.status;
+            },
+            async register(){
+                try {
+                    let name = document.getElementById('name').value;
+                    let email = document.getElementById('email').value;
+                    let pass = document.getElementById('pass').value;
+                    let pass_confirm = document.getElementById('pass_confirm').value;
+                    
+                    if (name === "" || 
+                        email === "" ||
+                        pass === "" ||
+                        pass_confirm === ""
+                    ){
+                        this.showError('Ошибка регистрации!');
+                        return;
+                    }
+
+                    if (pass === pass_confirm) {
+                        const user = {
+                            "name": name,
+                            "email": email,
+                            "password": pass
+                        }
+
+                        const response = await register(user);
+
+                        if(response.data.status === 'success'){    
+                            const token = response.data.token;
+                            localStorage.setItem(token_key, token);
+                            this.isLogin = true;
+                        }else{
+                            this.showError('Ошибка регистрации!');
+                        }
+                    }
+                } catch (error) {
+                    this.showError('Ошибка! Сервер временно не доступен!');
+                }
+            },
+            logout(){
+                localStorage.removeItem(token_key);
+                this.isLogin = false;
+            },
+            async login(){
+                try {
+                    let email = document.getElementById('email_login').value;
+                    let pass = document.getElementById('password_login').value;
+
+                    const user = {
+                        "email": email,
+                        "password": pass
+                    }
+
+                    const response = await login(user);
+
+                    if(response.data.status === 'success'){    
+                        const token = response.data.token;
+                        localStorage.setItem(token_key, token);
+                        this.isLogin = true;
+                    }else{
+                        this.showError('Ошибка авторизации!');
+                    }
+                } catch (error) {
+                    this.showError('Ошибка! Сервер временно не доступен!');
+                }
+            },
+            async passwordResert(){
+                try {
+                    let oldPassword = document.getElementById('old_password_reset').value;
+                    let newPassword = document.getElementById('new_password_reset').value;
+                    let newPasswordConfirm = document.getElementById('new_password_confirm_reset').value;
+
+                    if (newPassword === newPasswordConfirm) {
+                        const response = await resertPassword(
+                            oldPassword, 
+                            newPassword
+                        );
+
+                        console.log(response);
+                    }else{
+                        this.showError('Ошибка смены пароля!');
+                    }
+                } catch (error) {
+                    this.showError('Ошибка! Сервер временно не доступен!');
+                }                
+            },
+            async getUserInfo() {
+                try {
+                    const response = await getUserInfo();
+                    let user = response.data.user;
+                    let created_at = new Date(user.created_at);
+                    const year = created_at.getFullYear();
+                    const mounth = (created_at.getMonth()+1)<10 ? "0" + (created_at.getMonth()+1) : (created_at.getMonth()+1);
+                    const date = created_at.getDate();
+                    let created_at_formated = year + "/" + mounth + "/" + date;
+                    user.created_at = created_at_formated;
+
+                    return response.data.user;
+                } catch (error) {
+                    this.showError('Ошибка получения данных пользователя!');
+                }
+            },  
+            showError(text){
+                this.$swal({
+                    title: 'Ошибка!',
+                    text: text,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                })
+            },
+        }
 	}
 </script>
 
