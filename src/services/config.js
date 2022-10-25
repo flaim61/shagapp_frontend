@@ -2,6 +2,7 @@
 export const baseUrl = 'http://127.0.0.1:8000/';
 export const baseUrlApi = baseUrl + 'api';
 export const baseUrlStorage = baseUrl + 'storage/';
+export const token_key = 'token';
 
 const api = {
     category: {
@@ -13,6 +14,11 @@ const api = {
     },
     banner: {
         get: baseUrlApi + "/banner"
+    },
+    user: {
+        register: baseUrlApi + '/register',
+        isAuthorisated: baseUrlApi + '/user-check',
+        login: baseUrlApi + "/login"
     }
 }
 

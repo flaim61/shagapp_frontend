@@ -11,18 +11,8 @@
 						</ol>
 						
 						<div class="carousel-inner" id="main-slider">
-							<div v-for="(banner, index) in this.bannerImages" :key="index" class="item">
-								<div class="col-sm-12">
-									<h1><span>E</span>-SHOPPER</h1>
-									<h2>{{ banner.name }}</h2>
-									<p>{{ banner.description }}</p>
-									<p>{{ banner.style.background}}</p>
-									<button type="button" class="btn btn-default get">Get it now</button>
-								</div>
-								<!--<div class="col-sm-6">
-									<img src="/src/assets/images/home/girl1.jpg" class="girl img-responsive" alt="" />
-									<img src="/src/assets/images/home/pricing.png"  class="pricing" alt="" />
-								</div>-->
+							<div v-for="(item, index) in this.bannerImages" :key="index" class="item">
+								<img :src="item" style="width: 100%">
 							</div>
 							
 							
@@ -43,9 +33,8 @@
 </template>
 
 <script>
-	import {
-		getBanners
-	} from "../../services/methods.js";
+	import { getBanners } from "../../services/methods.js";
+	import { baseUrlStorage } from '../../services/config.js';
 
 	export default {
 		name: 'Slider',
@@ -62,19 +51,12 @@
 		methods:{
 			async getBannerImages(){
 				let banners = await getBanners();
-				
-				banners = banners.data.map(function(item, index) {
-                    return {
-                        name: item.name,
-						description: item.description,
-						style: {
-							background: item.image_src
-						},
-                        id: item.id
-                    };
-                });
+				let images = [];
 
-				return banners;
+				for (let i = 0; i < banners.data[0].images.length; i++) {
+					images.push(baseUrlStorage + banners.data[0].images[i])
+				}
+				return images;
 			}
 		}
 	}
