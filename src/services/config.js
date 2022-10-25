@@ -18,7 +18,9 @@ const api = {
     user: {
         register: baseUrlApi + '/register',
         isAuthorisated: baseUrlApi + '/user-check',
-        login: baseUrlApi + "/login"
+        login: baseUrlApi + "/login",
+        resertPassword: baseUrlApi + '/resert-password',
+        getInfo: baseUrlApi + '/get-info'
     }
 }
 
