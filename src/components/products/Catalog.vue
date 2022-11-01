@@ -16,12 +16,11 @@
                     <div class="choose">
                         <ul class="nav nav-pills nav-justified">
                             <li><a href="#"><i class="fa fa-plus-square"></i>Добавить в Wishlist</a></li>
-                            <li><a href="#"><i class="fa fa-plus-square"></i>Добавить в корзину</a></li>
                         </ul>
                     </div>
                 </div>
             </div>
-            
+
         </div><!--features_items-->
         <RecomendedProducts />
     </div>
@@ -31,7 +30,7 @@
     import RecomendedProducts from "./RecomendedProducts.vue";
     import { getProducts } from '../../services/methods.js';
     import { baseUrlStorage } from "../../services/config.js"
- 
+
     export default {
         name: "Catalog",
         components: {
@@ -49,7 +48,7 @@
         methods: {
             async getProducts(){
                 let products = await getProducts(this.$route.params.id);
-                
+
                 products = products.data.map(function(item, index) {
                     return {
                         name: item.name,

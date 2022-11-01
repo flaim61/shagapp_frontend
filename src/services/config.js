@@ -10,7 +10,8 @@ const api = {
     },
     product: {
         get: baseUrlApi + "/products",
-        getInfo: baseUrlApi + "/product"
+        getInfo: baseUrlApi + "/product",
+        getProductsInCart: baseUrlApi + "/products/get-products-info"
     },
     banner: {
         get: baseUrlApi + "/banner"

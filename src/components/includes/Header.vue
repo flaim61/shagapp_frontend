@@ -25,7 +25,7 @@
 				</div>
 			</div>
 		</div><!--/header_top-->
-		
+
 		<div class="header-middle"><!--header-middle-->
 			<div class="container">
 				<div class="row">
@@ -37,11 +37,11 @@
 					<div class="col-sm-8">
 						<div class="shop-menu pull-right">
 							<ul class="nav navbar-nav">
-								
-								<li v-if="this.isLogin"><a @click="this.$router.push('/user')"><i class="fa fa-user"></i> Account</a></li>
+
+								<li v-if="this.isLogin"><a @click="this.$router.push('/user')"><i class="fa fa-user"></i> Аккаунт</a></li>
 								<li><a href="#"><i class="fa fa-star"></i> Wishlist</a></li>
 								<li><a href="checkout.html"><i class="fa fa-crosshairs"></i> Checkout</a></li>
-								<li><a href="cart.html"><i class="fa fa-shopping-cart"></i> Cart</a></li>
+								<li ><a @click="this.$router.push('/cart')"><i class="fa fa-shopping-cart"></i> Корзина </a></li>
 								<li v-if="!this.isLogin"><a href="login.html"><i class="fa fa-lock"></i> Login</a></li>
 							</ul>
 						</div>
@@ -49,7 +49,7 @@
 				</div>
 			</div>
 		</div><!--/header-middle-->
-	
+
 		<div class="header-bottom"><!--header-bottom-->
 			<div class="container">
 				<div class="row">
@@ -65,7 +65,7 @@
 						<div class="mainmenu pull-left">
 							<ul class="nav navbar-nav collapse navbar-collapse">
 								<li><a href="#" @click="this.$router.push('/')" class="active">Главная</a></li>
-								
+
 								<Dropdown />
 
 								<li class="dropdown"><a href="#">Blog<i class="fa fa-angle-down"></i></a>
@@ -73,7 +73,7 @@
                                         <li><a href="blog.html">Blog List</a></li>
 										<li><a href="blog-single.html">Blog Single</a></li>
                                     </ul>
-                                </li> 
+                                </li>
 								<li><a href="contact-us.html">Contact</a></li>
 							</ul>
 						</div>
@@ -87,13 +87,13 @@
 			</div>
 		</div><!--/header-bottom-->
 	</header><!--/header-->
-</template>  
+</template>
 
 <script>
 	import Dropdown from "../Links/Dropdown.vue";
-	import { 
-        register, 
-        isAuthorisated, 
+	import {
+        register,
+        isAuthorisated,
         login,
         resertPassword,
         getUserInfo
@@ -119,7 +119,7 @@
             this.user = await this.getUserInfo();
         },
 		methods: {
-            async checkLogin(){ 
+            async checkLogin(){
                 const request = await isAuthorisated();
                 return request.data.status;
             },
@@ -129,8 +129,8 @@
                     let email = document.getElementById('email').value;
                     let pass = document.getElementById('pass').value;
                     let pass_confirm = document.getElementById('pass_confirm').value;
-                    
-                    if (name === "" || 
+
+                    if (name === "" ||
                         email === "" ||
                         pass === "" ||
                         pass_confirm === ""
@@ -148,7 +148,7 @@
 
                         const response = await register(user);
 
-                        if(response.data.status === 'success'){    
+                        if(response.data.status === 'success'){
                             const token = response.data.token;
                             localStorage.setItem(token_key, token);
                             this.isLogin = true;
@@ -176,7 +176,7 @@
 
                     const response = await login(user);
 
-                    if(response.data.status === 'success'){    
+                    if(response.data.status === 'success'){
                         const token = response.data.token;
                         localStorage.setItem(token_key, token);
                         this.isLogin = true;
@@ -195,7 +195,7 @@
 
                     if (newPassword === newPasswordConfirm) {
                         const response = await resertPassword(
-                            oldPassword, 
+                            oldPassword,
                             newPassword
                         );
 
@@ -205,7 +205,7 @@
                     }
                 } catch (error) {
                     this.showError('Ошибка! Сервер временно не доступен!');
-                }                
+                }
             },
             async getUserInfo() {
                 try {
@@ -222,7 +222,7 @@
                 } catch (error) {
                     this.showError('Ошибка получения данных пользователя!');
                 }
-            },  
+            },
             showError(text){
                 this.$swal({
                     title: 'Ошибка!',
